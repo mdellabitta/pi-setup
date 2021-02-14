@@ -1,0 +1,35 @@
+---
+- hosts: pis
+  become: yes
+  tasks:
+
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: "{{ pi_hostname }}"
+
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: Upgrade all apt packages
+      apt: upgrade=dist force_apt_get=yes
+    
+    - name: Install packages
+      apt:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - avahi-daemon
+        - docker
+            
+    - name: Get rid of motd-news adware
+      copy:
+        content: "ENABLED=0"
+        dest: /etc/default/motd-news
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+    - name: Disable spammy motd bits
+      file: dest="{{item}}" mode=a-x
+      loop:
+        - /etc/update-motd.d/10-help-text 
+        - /etc/update-motd.d/50-motd-news
