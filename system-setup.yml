@@ -20,7 +20,7 @@
     - name: Set time zone
       ansible.builtin.lineinfile:
         path: /etc/environment
-        line: "TZ=\"America/New_York\""      
+        line: "TZ=\"{{ tz }}\""      
 
     # Install and setup Docker stuff
         

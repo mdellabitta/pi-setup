@@ -1,2 +1,2 @@
 [pis]
-localhost ansible_connection=local pi_hostname=pi
+localhost ansible_connection=local pi_hostname=pi tz="America/New_York"
