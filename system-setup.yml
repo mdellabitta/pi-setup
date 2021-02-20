@@ -4,10 +4,26 @@
   gather_facts: no
   tasks:
 
+    # System setup
+    
     - name: Set hostname
       ansible.builtin.hostname:
         name: "{{ pi_hostname }}"
 
+    - name: Edit hostname into hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 localhost {{ pi_hostname }}"
+        state: present
+        regexp: '^127\.0\.0\.1'
+
+    - name: Set time zone
+      ansible.builtin.lineinfile:
+        path: /etc/environment
+        line: "TZ=\"America/New_York\""      
+
+    # Install and setup Docker stuff
+        
     - name: Add docker apt key
       ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -18,29 +34,41 @@
         repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable
         
     - name: Update apt-get repo and cache
-      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
 
     - name: Upgrade all apt packages
-      apt: upgrade=dist force_apt_get=yes
+      apt:
+        upgrade: dist
+        force_apt_get: yes
     
     - name: Install packages
       apt:
-        name: "{{item}}"
+        pkg:
+          - avahi-daemon
+          - libnss-mdns
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - python3-pip
         state: latest
-      loop:
-        - avahi-daemon
-        - libnss-mdns
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-        - python3-pip
         
     - name: Install docker-compose
       pip:
         name: docker-compose
         state: latest
-            
-    - name: Get rid of motd-news adware
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes          
+
+    # Disable Canonical login messages       
+
+    - name: Disable motd-news
       copy:
         content: "ENABLED=0"
         dest: /etc/default/motd-news
@@ -54,9 +82,35 @@
         - /etc/update-motd.d/10-help-text 
         - /etc/update-motd.d/50-motd-news
 
-    - name: Add ubuntu user to docker group
-      user:
-        name: ubuntu
-        groups: docker
-        append: yes
+    # Fix ubuntu's DNS situation so we get port 53 back
+    
+    - name: Disable DNSStubListener
+      community.general.ini_file:
+        path: /etc/systemd/resolved.conf
+        section: Resolve
+        option: DNSStubListener
+        value: "no"
+        
+    - name: Restart resolved.service
+      ansible.builtin.systemd:
+        state: restarted
+        name: systemd-resolved.service
 
+    - name: Check if resolvd.conf exists
+      stat:
+        path: "{{ item }}"
+      with_items:
+        - /etc/resolv.conf
+      register: check_file_name
+
+    - name: Move resolvd.conf to resolvd.conf.bak
+      command: mv "{{ item.stat.path }}" "{{destpath}}"
+      with_items:
+        - "{{ check_file_name.results }}"
+      when: item.stat.exists == true and not item.stat.islnk
+        
+    - name: Link systemd resolvd.conf
+      file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
