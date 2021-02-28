@@ -59,7 +59,7 @@
       command:
         cmd: "swapon -a"
         
-    # Install and setup Docker stuff
+    # Install and setup system packages
         
     - name: Add docker apt key
       ansible.builtin.apt_key:
@@ -68,6 +68,7 @@
 
     - name: Add docker repository
       ansible.builtin.apt_repository:
+        update_cache: no
         repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable
 
     - name: Add netdata apt key
@@ -77,6 +78,7 @@
 
     - name: Add netdata repository
       ansible.builtin.apt_repository:
+        update_cache: no
         repo: deb [arch=arm64] https://packagecloud.io/netdata/netdata/ubuntu/ focal main
         
     - name: Update apt-get repo and cache
@@ -100,6 +102,9 @@
           - containerd.io
           - python3-pip
           - netdata
+          - haveged
+          - powertop
+          - libraspberrypi-bin
         state: latest
         
     - name: Install docker-compose
@@ -111,7 +116,12 @@
       user:
         name: ubuntu
         groups: docker
-        append: yes          
+        append: yes
+
+    # Power consumption tuning
+
+    - name: Autoconfig powertop
+      command: powertop --auto-tune
 
     # Disable Canonical login messages       
 
@@ -128,12 +138,6 @@
       loop:
         - /etc/update-motd.d/10-help-text 
         - /etc/update-motd.d/50-motd-news
-
-    - name: Disable motd.service
-      ansible.builtin.systemd:
-        state: stopped
-        enabled: no
-        name: motd-news
 
     - name: Disable motd.timer
       ansible.builtin.systemd:
