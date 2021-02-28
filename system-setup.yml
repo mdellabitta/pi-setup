@@ -120,9 +120,26 @@
 
     # Power consumption tuning
 
-    - name: Autoconfig powertop
-      command: powertop --auto-tune
+    - name: Configure PowerTOP auto tune
+      copy:
+        content: |
+          [Unit]
+          Description=PowerTOP auto tune
 
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/powertop --auto-tune
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/powertop.service
+
+    - name: Install PowerTOP auto tune
+      ansible.builtin.systemd:
+        state: started
+        enabled: yes
+        name: powertop.service
+      
     # Disable Canonical login messages       
 
     - name: Disable motd-news
