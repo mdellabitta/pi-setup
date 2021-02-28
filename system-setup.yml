@@ -22,6 +22,43 @@
         path: /etc/environment
         line: "TZ=\"{{ tz }}\""      
 
+    # Enable swap
+    
+    - name: Set swap_file and swap_space variables
+      ansible.builtin.set_fact:
+        swap_space: 2147483648
+        swap_file: /mnt/swapfile
+
+    - name: Check if swap file exists
+      ansible.builtin.stat:
+        path: "{{ swap_file }}"
+      register: swap_file_check
+
+    - name: Create swap file
+      command:
+        cmd: "fallocate -l {{ swap_space }} {{ swap_file }}"
+      when: not swap_file_check.stat.exists
+
+    - name: Set permissions on swap file
+      ansible.builtin.file:
+        path: "{{ swap_file }}"
+        mode: 0600
+
+    - name: Format swap file
+      command:
+        cmd: "mkswap {{ swap_file }}"
+      when: not swap_file_check.stat.exists
+
+    - name: Add to fstab
+      ansible.builtin.lineinfile:
+        dest: /etc/fstab
+        regexp: "{{ swap_file }}"
+        line: "{{ swap_file }} none swap sw 0 0"
+
+    - name: Turn on swap
+      command:
+        cmd: "swapon -a"
+        
     # Install and setup Docker stuff
         
     - name: Add docker apt key
@@ -32,6 +69,15 @@
     - name: Add docker repository
       ansible.builtin.apt_repository:
         repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable
+
+    - name: Add netdata apt key
+      ansible.builtin.apt_key:
+        url: https://packagecloud.io/netdata/netdata/gpgkey 
+        id: 54832F89F09FED90
+
+    - name: Add netdata repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=arm64] https://packagecloud.io/netdata/netdata/ubuntu/ focal main
         
     - name: Update apt-get repo and cache
       apt:
@@ -53,6 +99,7 @@
           - docker-ce-cli
           - containerd.io
           - python3-pip
+          - netdata
         state: latest
         
     - name: Install docker-compose
@@ -81,6 +128,18 @@
       loop:
         - /etc/update-motd.d/10-help-text 
         - /etc/update-motd.d/50-motd-news
+
+    - name: Disable motd.service
+      ansible.builtin.systemd:
+        state: stopped
+        enabled: no
+        name: motd-news
+
+    - name: Disable motd.timer
+      ansible.builtin.systemd:
+        state: stopped
+        enabled: no
+        name: motd-news.timer
 
     # Fix ubuntu's DNS situation so we get port 53 back
     
@@ -114,3 +173,4 @@
         src: /run/systemd/resolve/resolv.conf
         dest: /etc/resolv.conf
         state: link
+
