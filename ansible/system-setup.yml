@@ -3,7 +3,22 @@
   become: yes
   gather_facts: no
   tasks:
-    
+
+    - name: Set network config
+      copy:
+        content: |
+          network:
+            version: 2
+            ethernets:
+              eth0:
+                addresses: [192.168.88.2/24]
+                gateway4: 192.168.88.1
+                nameservers:
+                  addresses: [1.0.0.2,1.1.1.2]
+                dhcp4: no
+                optional: true
+        dest: /etc/netplan/50-cloud-init.yaml
+          
     - name: Set hostname
       ansible.builtin.hostname:
         name: "{{ pi_hostname }}"
