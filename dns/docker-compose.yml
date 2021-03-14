@@ -24,6 +24,16 @@ services:
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
+#  unbound:
+#    container_name: unbound
+#    image: mvance/unbound:latest
+#    ports:
+#      - "5335:53/udp"
+#      - "5335:53/tcp"
+#    volumes:
+#      - unbound:/opt/unbound/etc/unbound/
+#    restart: unless-stopped
 volumes:
   etc-pihole:
   etc-dnsmasq.d:
+  unbound:
