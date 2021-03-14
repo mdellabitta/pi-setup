@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  unifi:
+    image: ryansch/unifi-rpi:latest
+    container_name: unifi
+    restart: unless-stopped
+    network_mode: host
+    # Uncomment the following to set java options
+    # environment:
+    #   JAVA_OPTS: -Xmx512M
+    volumes:
+      # Unifi v5.0.7 creates all of these directories (some remain empty)
+      - unifi-config:/var/lib/unifi
+      - unifi-log:/usr/lib/unifi/logs
+      - unifi-log2:/var/log/unifi
+      - unifi-run:/usr/lib/unifi/run
+      - unifi-run2:/run/unifi
+      - unifi-work:/usr/lib/unifi/work
+    environment:
+      - PUID=1000
+      - PGID=1000
+volumes:
+  unifi-config:
+  unifi-log:
+  unifi-log2:
+  unifi-run:
+  unifi-run2:
+  unifi-work:
+  
