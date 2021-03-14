@@ -26,7 +26,7 @@
     - name: Edit hostname into hosts
       ansible.builtin.lineinfile:
         path: /etc/hosts
-        line: "127.0.0.1 localhost {{ pi_hostname }}"
+        line: "127.0.0.1 localhost {{ pi_hostname }} {{ pi_hostname }}.local"
         state: present
         regexp: '^127\.0\.0\.1'
 
