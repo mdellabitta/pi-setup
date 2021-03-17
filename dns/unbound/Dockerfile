@@ -1,7 +1,7 @@
-FROM alpine:latest
+FROM debian:buster-slim
 
-RUN apk update && apk add unbound tini 
+RUN apt-get update && apt-get -y install unbound tini 
 COPY unbound.conf /etc/unbound/unbound.conf
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/sbin/unbound", "-c", "/etc/unbound/unbound.conf", "-d", "-d"]
