@@ -1,10 +1,20 @@
 version: "3"
 
-# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+        config:
+        - subnet: 172.20.0.0/16
+
 services:
+
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
+    networks:
+      dns_net:
+        ipv4_address: 172.20.0.6
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -14,25 +24,27 @@ services:
     environment:
       TZ: 'America/New_York'
       WEBPASSWORD: "${PIHOLE_PASSWORD}"
-      PIHOLE_DNS_: "${PIHOLE_DNS_}"
-    # Volumes store your data between container upgrades
+      PIHOLE_DNS_: 172.20.0.7
     volumes:
       - etc-pihole:/etc/pihole/
       - etc-dnsmasq.d:/etc/dnsmasq.d/
-    # Recommended but not required (DHCP needs NET_ADMIN)
-    # https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
-#  unbound:
-#    container_name: unbound
-#    image: mvance/unbound:latest
-#    ports:
-#      - "5335:53/udp"
-#      - "5335:53/tcp"
+
+  unbound:
+    container_name: unbound
+    build: unbound
+    networks:
+      dns_net:
+        ipv4_address: 172.20.0.7
+    ports:
+      - "5335:5335/udp"
+      - "5335:5335/tcp"
 #    volumes:
 #      - unbound:/opt/unbound/etc/unbound/
-#    restart: unless-stopped
+    restart: unless-stopped
+
 volumes:
   etc-pihole:
   etc-dnsmasq.d:
