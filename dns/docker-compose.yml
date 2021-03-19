@@ -41,11 +41,9 @@ services:
     ports:
       - "5335:5335/udp"
       - "5335:5335/tcp"
-#    volumes:
-#      - unbound:/opt/unbound/etc/unbound/
     restart: unless-stopped
 
 volumes:
   etc-pihole:
   etc-dnsmasq.d:
-  unbound:
+
