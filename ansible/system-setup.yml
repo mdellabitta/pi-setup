@@ -1,23 +1,22 @@
 ---
-- hosts: pis
+- hosts: localhost
   become: yes
   gather_facts: no
   tasks:
 
-    - name: Set network config
-      copy:
-        content: |
-          network:
-            version: 2
-            ethernets:
-              eth0:
-                addresses: [192.168.88.2/24]
-                gateway4: 192.168.88.1
-                nameservers:
-                  addresses: [1.0.0.2,1.1.1.2]
-                dhcp4: no
-                optional: true
-        dest: /etc/netplan/50-cloud-init.yaml
+    # - name: Set network config
+    #   copy:
+    #     content: |
+    #       network:
+    #         version: 2
+    #         ethernets:
+    #           eth0:
+    #             addresses: [192.168.88.2/24]
+    #             gateway4: 192.168.88.1
+    #             nameservers:
+    #               addresses: [1.0.0.2,1.1.1.2]
+    #             dhcp4: no
+    #     dest: /etc/netplan/50-cloud-init.yaml
           
     - name: Set hostname
       ansible.builtin.hostname:
@@ -34,52 +33,52 @@
       ansible.builtin.lineinfile:
         path: /etc/environment
         line: "TZ=\"{{ tz }}\""      
-    
-    - name: Set swap_file and swap_space variables
-      ansible.builtin.set_fact:
-        swap_space: 2147483648
-        swap_file: /mnt/swapfile
 
-    - name: Check if swap file exists
-      ansible.builtin.stat:
-        path: "{{ swap_file }}"
-      register: swap_file_check
+    # - name: Set swap_file and swap_space variables
+    #   ansible.builtin.set_fact:
+    #     swap_space: 2147483648
+    #     swap_file: /mnt/swapfile
 
-    - name: Create swap file
-      command:
-        cmd: "fallocate -l {{ swap_space }} {{ swap_file }}"
-      when: not swap_file_check.stat.exists
+    # - name: Check if swap file exists
+    #   ansible.builtin.stat:
+    #     path: "{{ swap_file }}"
+    #   register: swap_file_check
 
-    - name: Set permissions on swap file
-      ansible.builtin.file:
-        path: "{{ swap_file }}"
-        mode: 0600
+    # - name: Create swap file
+    #   command:
+    #     cmd: "fallocate -l {{ swap_space }} {{ swap_file }}"
+    #   when: not swap_file_check.stat.exists
 
-    - name: Format swap file
-      command:
-        cmd: "mkswap {{ swap_file }}"
-      when: not swap_file_check.stat.exists
+    # - name: Set permissions on swap file
+    #   ansible.builtin.file:
+    #     path: "{{ swap_file }}"
+    #     mode: 0600
 
-    - name: Add to fstab
-      ansible.builtin.lineinfile:
-        dest: /etc/fstab
-        regexp: "{{ swap_file }}"
-        line: "{{ swap_file }} none swap sw 0 0"
+    # - name: Format swap file
+    #   command:
+    #     cmd: "mkswap {{ swap_file }}"
+    #   when: not swap_file_check.stat.exists
 
-    - name: Turn on swap
-      command:
-        cmd: "swapon -a"
-      when: not swap_file_check.stat.exists
+    # - name: Add to fstab
+    #   ansible.builtin.lineinfile:
+    #     dest: /etc/fstab
+    #     regexp: "{{ swap_file }}"
+    #     line: "{{ swap_file }} none swap sw 0 0"
+
+    # - name: Turn on swap
+    #   command:
+    #     cmd: "swapon -a"
+    #   when: not swap_file_check.stat.exists
         
     - name: Add docker apt key
       ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+        url: https://download.docker.com/linux/debian/gpg #todo change to raspbian
         id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
     - name: Add docker repository
       ansible.builtin.apt_repository:
         update_cache: no
-        repo: deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian buster stable
 
     - name: Add netdata apt key
       ansible.builtin.apt_key:
@@ -89,7 +88,7 @@
     - name: Add netdata repository
       ansible.builtin.apt_repository:
         update_cache: no
-        repo: deb [arch=arm64] https://packagecloud.io/netdata/netdata/ubuntu/ focal main
+        repo: deb [arch=amd64] https://packagecloud.io/netdata/netdata/debian/ buster main
         
     - name: Update apt-get repo and cache
       apt:
@@ -105,6 +104,11 @@
     - name: Install packages
       apt:
         pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
           - avahi-daemon
           - libnss-mdns
           - docker-ce
@@ -114,7 +118,7 @@
           - netdata
           - haveged
           - powertop
-          - libraspberrypi-bin
+          # - libraspberrypi-bin
         state: latest
         
     - name: Install docker-compose
@@ -122,9 +126,9 @@
         name: docker-compose
         state: latest
 
-    - name: Add ubuntu user to docker group
+    - name: Add pi user to docker group
       user:
-        name: ubuntu
+        name: pi
         groups: docker
         append: yes
 
@@ -148,45 +152,24 @@
         enabled: yes
         name: powertop.service
       
+    # - name: Configure pi bootstrap parameters
+    #   copy:
+    #     content: |
+    #       enable_uart=0
+    #       dtparam=audio=off
+    #       dtparam=i2c_arm=off
+    #       dtparam=spi=off
+    #       gpu_mem=16
+    #       dtoverlay=disable-bt
+    #       dtoverlay=disable-wifi
+    #     dest: /boot/firmware/usercfg.txt
 
-    - name: Disable motd-news
-      copy:
-        content: "ENABLED=0"
-        dest: /etc/default/motd-news
-        owner: root
-        group: root
-        mode: u=rw,g=r,o=r
-        
-    - name: Disable spammy motd bits
-      file: dest="{{item}}" mode=a-x
-      loop:
-        - /etc/update-motd.d/10-help-text 
-        - /etc/update-motd.d/50-motd-news
+    # - name: Set up kernel for docker
+    #   copy:
+    #     content: |
+    #       swapaccount=1 cgroup_enable=memory cgroup_memory=1 dwc_otg.fiq_fix_enable=1 net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=ext4 elevator=deadline rootwait fixrtc
+    #     dest: /boot/firmware/cmdline.txt
 
-    - name: Disable motd.timer
-      ansible.builtin.systemd:
-        state: stopped
-        enabled: no
-        name: motd-news.timer
-
-    - name: Configure pi bootstrap parameters
-      copy:
-        content: |
-          enable_uart=0
-          dtparam=audio=off
-          dtparam=i2c_arm=off
-          dtparam=spi=off
-          gpu_mem=16
-          dtoverlay=disable-bt
-          dtoverlay=disable-wifi
-        dest: /boot/firmware/usercfg.txt
-
-    - name: Set up kernel for docker
-      copy:
-        content: |
-          swapaccount=1 cgroup_enable=memory cgroup_memory=1 dwc_otg.fiq_fix_enable=1 net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=ext4 elevator=deadline rootwait fixrtc
-        dest: /boot/firmware/cmdline.txt
-
-    - name: Disable wifi
-      command:
-        cmd: systemctl mask wpa_supplicant.service
+    # - name: Disable wifi
+    #   command:
+    #     cmd: systemctl mask wpa_supplicant.service
