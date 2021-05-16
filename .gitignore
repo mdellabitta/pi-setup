@@ -4,3 +4,4 @@ etc-pihole/
 
 ansible/.vagrant/
 ansible/venv/
+.vscode/
