@@ -5,3 +5,5 @@ etc-pihole/
 ansible/.vagrant/
 ansible/venv/
 .vscode/
+
+ansible/.python-version
