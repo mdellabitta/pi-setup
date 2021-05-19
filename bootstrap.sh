@@ -63,5 +63,5 @@ cd ~/pi-setup/ansible
 pyenv local 3.9.5
 python -m venv venv
 pip install ansible
-ansible-galaxy collection install community.general
+ansible-galaxy collection install -r=requirements.yml
 cd ~
