@@ -34,6 +34,8 @@
         path: /etc/environment
         line: "TZ=\"{{ tz }}\""      
 
+# todo swap	
+
     # - name: Set swap_file and swap_space variables
     #   ansible.builtin.set_fact:
     #     swap_space: 2147483648
@@ -69,16 +71,18 @@
     #   command:
     #     cmd: "swapon -a"
     #   when: not swap_file_check.stat.exists
-        
+
+    # todo parameterize arch and distro
+
     - name: Add docker apt key
       ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/debian/gpg #todo change to raspbian
+        url: https://download.docker.com/linux/raspbian/gpg
         id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
     - name: Add docker repository
       ansible.builtin.apt_repository:
         update_cache: no
-        repo: deb [arch=amd64] https://download.docker.com/linux/debian buster stable
+        repo: deb [arch=armhf] https://download.docker.com/linux/raspbian buster stable
 
     - name: Add netdata apt key
       ansible.builtin.apt_key:
@@ -88,7 +92,7 @@
     - name: Add netdata repository
       ansible.builtin.apt_repository:
         update_cache: no
-        repo: deb [arch=amd64] https://packagecloud.io/netdata/netdata/debian/ buster main
+        repo: deb [arch=armhf] https://packagecloud.io/netdata/netdata/debian/ buster main
         
     - name: Update apt-get repo and cache
       apt:
