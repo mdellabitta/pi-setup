@@ -4,7 +4,7 @@
 # ansible playbooks in the repo. We're installing the latest ansible
 # using pip, and pip and a recent python using pyenv.
 
-# Script is written assuming Debian Buster. May work elsewhere.
+# Script is written assuming Raspbian. May work elsewhere.
 
 set -euxo pipefail
 
@@ -41,7 +41,7 @@ fi
 if ! [[ -d ~/.pyenv ]]
 then
 	git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-	cd ~/.pyenv && src/configure && make -C src; cd ~
+	cd ~/.pyenv && src/configure && make -C src; cd -
 fi
 
 if [ $(grep -q pyenv ~/.profile) ]
@@ -59,9 +59,7 @@ then
 fi
 
 pyenv install -s 3.9.5
-cd ~/pi-setup/ansible
-pyenv local 3.9.5
-python -m venv venv
+pyenv global 3.9.5
 pip install ansible
-ansible-galaxy collection install -r=requirements.yml
-cd ~
+ansible-galaxy collection install -r=ansible/requirements.yml
+
