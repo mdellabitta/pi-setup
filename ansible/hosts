@@ -1,2 +1,2 @@
 [pis]
-localhost ansible_connection=local pi_hostname=pi tz="America/New_York" ansible_python_interpreter=/home/pi/.pyenv/shims/python
+localhost ansible_connection=local pi_hostname=pi wifi=US gpu_mem=16 locale="en_US.UTF-8" tz="US/Eastern" ansible_python_interpreter=/home/pi/.pyenv/shims/python arch=armhf distro=raspbian release=buster
