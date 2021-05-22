@@ -4,19 +4,14 @@
   gather_facts: no
   tasks:
 
-    # - name: Set network config
-    #   copy:
-    #     content: |
-    #       network:
-    #         version: 2
-    #         ethernets:
-    #           eth0:
-    #             addresses: [192.168.88.2/24]
-    #             gateway4: 192.168.88.1
-    #             nameservers:
-    #               addresses: [1.0.0.2,1.1.1.2]
-    #             dhcp4: no
-    #     dest: /etc/netplan/50-cloud-init.yaml
+    - name: Set network config
+      copy:
+        content: |
+          static ip_address={{ ip_address }}/24
+          #ip6_address=
+          static routers={{ router }}
+          static domain_name_servers={{ domain_name_servers }}
+        dest: /etc/dhcpcd.conf
 
     - name: Set hostname
       script:
