@@ -8,7 +8,6 @@
       copy:
         content: |
           static ip_address={{ ip_address }}/24
-          #ip6_address=
           static routers={{ router }}
           static domain_name_servers={{ domain_name_servers }}
         dest: /etc/dhcpcd.conf
