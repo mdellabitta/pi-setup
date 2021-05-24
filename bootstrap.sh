@@ -4,15 +4,17 @@
 # ansible playbooks in the repo. We're installing the latest ansible
 # using pip, and pip and a recent python using pyenv.
 
-# Script is written assuming Raspbian. May work elsewhere.
+# Script is written assuming Raspbian. May work elsewhere. In the case
+# of the Vagrantfile in this repo, it's working in Debian x86-64. 
 
 set -euxo pipefail
 
-sudo apt update
+echo '---> Updating package list'
+sudo apt-get update
 
 # Most of these dependencies are here to get python builds working.
-
-sudo apt install -y \
+echo '---> Installing packages'
+sudo apt-get install -y \
 	git \
 	make \
 	build-essential \
@@ -33,33 +35,36 @@ sudo apt install -y \
 	liblzma-dev \
 	rustc
 
-if ! [[ -d ~/pi-setup ]]
+if ! [[ -d $HOME/pi-setup ]]
 then
+	echo '---> Cloning pi-setup'
 	git clone https://github.com/mdellabitta/pi-setup.git
 fi
 
-if ! [[ -d ~/.pyenv ]]
+if ! [[ -d $HOME/.pyenv ]]
 then
-	git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-	cd ~/.pyenv && src/configure && make -C src; cd -
+	echo '---> Downloading and building pyenv'
+	git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
+	cd $HOME/.pyenv && src/configure && make -C src; cd -
 fi
 
-if [ $(grep -q pyenv ~/.profile) ]
+if ! grep -q pyenv $HOME/.profile
 then
-	echo 'Installing pyenv into .profile'
-	echo 'export PYENV_ROOT="$HOME/.pyenv"' > profile.tmp
-	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> profile.tmp
-	echo 'eval "$(pyenv init --path)"' >> profile.tmp
-	cat .profile >> profile.tmp
-	mv .profile .profile.bak.$(timestamp=$(date +%s))
-	mv profile.tmp .profile
-	export PYENV_ROOT="$HOME/.pyenv"
-	export PATH="$PYENV_ROOT/bin:$PATH"
-        eval "$(pyenv init --path)"
+	echo '---> Installing pyenv into .profile'
+	echo 'export PYENV_ROOT="$HOME/.pyenv"' > $HOME/profile.tmp
+	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/profile.tmp
+	echo 'eval "$(pyenv init --path)"' >> $HOME/profile.tmp
+	cat $HOME/.profile >> $HOME/profile.tmp
+	mv $HOME/.profile $HOME/.profile.bak.$(timestamp=$(date +%s))
+	mv $HOME/profile.tmp $HOME/.profile
 fi
 
+source $HOME/.profile
+
+echo '---> Installing python 3.9.5 and setting it as default'
 pyenv install -s 3.9.5
 pyenv global 3.9.5
-pip install ansible
-ansible-galaxy collection install -r=ansible/requirements.yml
 
+echo '---> Installing ansible and requirements'
+pip install ansible
+cd $HOME/pi-setup && ansible-galaxy collection install -r=ansible/requirements.yml; cd -
