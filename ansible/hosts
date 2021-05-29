@@ -1,2 +1,2 @@
 [pis]
-localhost ansible_connection=local pi_hostname=pi wifi=US gpu_mem=16 locale="en_US.UTF-8" tz="US/Eastern" ansible_python_interpreter=/home/pi/.pyenv/shims/python arch=armhf distro=raspbian release=buster ip_address=192.168.88.2 router=192.168.88.1 domain_name_servers="9.9.9.9 149.112.112.112"
+localhost ansible_connection=local pi_hostname=pi wifi=US gpu_mem=16 locale="en_US.UTF-8" tz="US/Eastern" ansible_python_interpreter=/home/pi/.pyenv/shims/python ip_address=192.168.88.2 router=192.168.88.1 domain_name_servers="9.9.9.11 149.112.112.11"
