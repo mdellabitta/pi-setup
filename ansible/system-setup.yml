@@ -79,6 +79,23 @@
         # netdata doesn't have an explicit raspbian release so defaulting to debian
         repo: "deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/netdata-archive-keyring.gpg] https://packagecloud.io/netdata/netdata/debian {{ deb_codename }} main"
 
+    - name: Prevent packages.microsoft.com from resolving
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: 0.0.0.0 packages.microsoft.com
+        state: present
+        regexp: 'packages.microsoft.com$'
+    
+    - name: Untrust Microsoft key
+      copy:
+        content: ""
+        dest: /etc/apt/trusted.gpg.d/microsoft.gpg 
+
+    - name: Remove VSCode package source
+      copy:
+        content: ""
+        dest: /etc/apt/sources.list.d/vscode.list
+
     - name: Update apt-get repo and cache
       apt:
         update_cache: yes
