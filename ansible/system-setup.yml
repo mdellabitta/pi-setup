@@ -89,12 +89,14 @@
     - name: Untrust Microsoft key
       copy:
         content: ""
-        dest: /etc/apt/trusted.gpg.d/microsoft.gpg 
+        dest: /etc/apt/trusted.gpg.d/microsoft.gpg
+        mode: a-w
 
     - name: Remove VSCode package source
       copy:
         content: ""
         dest: /etc/apt/sources.list.d/vscode.list
+        mode: a-w
 
     - name: Update apt-get repo and cache
       apt:
