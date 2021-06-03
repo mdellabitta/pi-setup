@@ -128,6 +128,15 @@
           - powertop
         state: latest
 
+    - name: Make Netdata available on the LAN
+      ansible.builtin.lineinfile:
+        path: /etc/netdata/netdata.conf
+        line: "\tbind socket to IP = 0.0.0.0"
+        state: present
+        regexp: 'bind socket to IP'
+      notify:
+        - Restart Netdata
+          
     - name: Install docker-compose
       pip:
         name: docker-compose
@@ -160,6 +169,11 @@
         name: powertop.service
 
   handlers:
+    - name: Restart Netdata
+      systemd:
+        name: netdata
+        state: restarted
+        
     - name: Reload swap
       shell: "{{ item }}"
       with_items:
