@@ -128,6 +128,14 @@
           - powertop
         state: latest
 
+    - name: Add Netdata user to Docker group
+      user:
+        name: netdata
+        groups: docker,netdata
+        append: yes
+      notify:
+        - Restart Netdata
+        
     - name: Make Netdata available on the LAN
       ansible.builtin.lineinfile:
         path: /etc/netdata/netdata.conf
