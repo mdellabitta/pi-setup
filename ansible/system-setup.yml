@@ -3,8 +3,9 @@
   become: yes
 
   tasks:
+    
     - set_fact:
-        deb_arch: "{{ 'armhf' if ( ansible_facts['architecture'] == 'armv7l' ) else 'amd64' }}"
+        deb_arch: "{% if ( ansible_facts['architecture'] == 'armv7l' ) %}armhf{% elif ( ansible_facts['architecture'] == 'aarch64' ) %}arm64{% else %}amd64{% endif %}"
 
     - set_fact:
         deb_os: "{{ 'raspbian' if ( ansible_facts['lsb']['id'] == 'Raspbian' ) else 'debian' }}"
@@ -12,14 +13,9 @@
     - set_fact:
         deb_codename: "{{ ansible_facts['lsb']['codename'] }}"
 
-    - name: Set network config
-      copy:
-        content: |
-          static ip_address={{ ip_address }}/24
-          static routers={{ router }}
-          static domain_name_servers={{ domain_name_servers }}
-        dest: /etc/dhcpcd.conf
-      when: deb_os == "raspbian"
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: ansible_facts
 
     - name: Set hostname
       script:
@@ -45,16 +41,6 @@
       script:
         cmd: "/usr/bin/raspi-config nonint do_memory_split {{ gpu_mem }}"
       when: deb_os == "raspbian"
-
-    - name: Configure swap
-      ansible.builtin.lineinfile:
-        path: /etc/dphys-swapfile
-        line: CONF_SWAPSIZE=2048
-        state: present
-        regexp: '^CONF_SWAPSIZE'
-      when: deb_os == "raspbian"
-      notify:
-      - Refresh swap
 
     - name: Add docker apt key
       ansible.builtin.shell:
@@ -181,10 +167,3 @@
       systemd:
         name: netdata
         state: restarted
-        
-    - name: Reload swap
-      shell: "{{ item }}"
-      with_items:
-      - dphys-swapfile swapoff
-      - dphys-swapfile setup
-      - dphys-swapfile swapon
