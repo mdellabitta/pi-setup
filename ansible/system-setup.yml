@@ -13,15 +13,6 @@
     - set_fact:
         deb_codename: "{{ ansible_facts['lsb']['codename'] }}"
 
-    - name: Print all available facts
-      ansible.builtin.debug:
-        var: ansible_facts
-
-    - name: Set hostname
-      script:
-        cmd: "/usr/bin/raspi-config nonint do_hostname {{ pi_hostname }}"
-      when: deb_os == "raspbian"
-
     - name: Set locale
       script:
         cmd: "/usr/bin/raspi-config nonint do_change_timezone {{ tz }}"

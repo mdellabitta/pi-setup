@@ -1,6 +1,4 @@
 .env
-etc-dnsmasq.d/
-etc-pihole/
 
 ansible/.vagrant/
 ansible/venv/
