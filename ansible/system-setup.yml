@@ -4,34 +4,38 @@
 
   tasks:
     
-    - set_fact:
+    - name: Detect arch
+      set_fact:
         deb_arch: "{% if ( ansible_facts['architecture'] == 'armv7l' ) %}armhf{% elif ( ansible_facts['architecture'] == 'aarch64' ) %}arm64{% else %}amd64{% endif %}"
 
-    - set_fact:
-        deb_os: "{{ 'raspbian' if ( ansible_facts['lsb']['id'] == 'Raspbian' ) else 'debian' }}"
+    - name: Detect raspi-config
+      stat:
+        path: /usr/bin/raspi-config
+      register: raspi_config    
 
-    - set_fact:
+    - name: Detect codename
+      set_fact:
         deb_codename: "{{ ansible_facts['lsb']['codename'] }}"
 
     - name: Set locale
       script:
         cmd: "/usr/bin/raspi-config nonint do_change_timezone {{ tz }}"
-      when: deb_os == "raspbian"
+      when: raspi_config.stat.exists
 
     - name: Set timezone
       script:
         cmd: "/usr/bin/raspi-config nonint do_change_locale {{ locale }}"
-      when: deb_os == "raspbian"
+      when: raspi_config.stat.exists
 
     - name: Set wifi country
       script:
         cmd: "/usr/bin/raspi-config nonint do_wifi_country {{ wifi }}"
-      when: deb_os == "raspbian"
+      when: raspi_config.stat.exists
 
     - name: Set memory split
       script:
         cmd: "/usr/bin/raspi-config nonint do_memory_split {{ gpu_mem }}"
-      when: deb_os == "raspbian"
+      when: raspi_config.stat.exists
 
     - name: Add docker apt key
       ansible.builtin.shell:
@@ -42,7 +46,7 @@
       ansible.builtin.apt_repository:
         update_cache: no
         filename: docker-ce
-        repo: "deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/{{ deb_os }} {{ deb_codename }} stable"
+        repo: "deb [arch={{ deb_arch }} signed-by=/usr/share/keyrings/docker-ce-archive-keyring.gpg] https://download.docker.com/linux/debian {{ deb_codename }} stable"
 
     - name: Add netdata apt key
       ansible.builtin.shell:
