@@ -107,6 +107,7 @@
           - netdata
           - haveged
           - powertop
+          - apache2-utils
         state: latest
 
     - name: Add Netdata user to Docker group
