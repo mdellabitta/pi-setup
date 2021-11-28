@@ -1,0 +1,55 @@
+---
+- hosts: localhost
+  become: yes
+
+  tasks:
+
+    - name: Install packages
+      apt:
+        pkg:
+          - build-essential
+          - qt5-qmake
+          # - qt5-default
+          - libqt5core5a
+          - qtbase5-dev
+          - libqt5serialport5
+          - libqt5serialport5-dev
+          - libqt5multimedia5
+          - libqt5multimedia5-plugins
+          - qtmultimedia5-dev
+          - git 
+          - libopus-dev
+          - libqcustomplot2.0
+          - libqcustomplot-doc
+          - libqcustomplot-dev
+
+    - name: Checkout wfview repo
+      ansible.builtin.git:
+        repo: https://gitlab.com/eliggett/wfview.git
+        dest: /tmp/wfview
+
+    - name: Create build directory
+      file:
+        path: /tmp/wfview/build
+        state: directory
+
+    - name: Install wfview - qmake
+      ansible.builtin.command:
+        cmd: qmake ../wfview.pro 
+        chdir: /tmp/wfview/build
+
+    - name: Install wfview - make
+      ansible.builtin.command:
+        cmd: make
+        chdir: /tmp/wfview/build
+ 
+    - name: Install wfview - make install
+      ansible.builtin.command:
+        cmd: make install
+        chdir: /tmp/wfview/build
+      become: yes
+
+    - name: Add user to dialout
+      ansible.builtin.command:
+        cmd: usermod -aG dialout pi
+      become: yes
