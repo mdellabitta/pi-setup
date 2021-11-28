@@ -108,6 +108,8 @@
           - haveged
           - powertop
           - apache2-utils
+          - emacs-nox
+          - elpa-yaml-mode
         state: latest
 
     - name: Add Netdata user to Docker group
