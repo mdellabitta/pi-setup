@@ -4,7 +4,6 @@ services:
   unifi-controller:
     image: lscr.io/linuxserver/unifi-controller
     container_name: unifi-controller
-    network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
