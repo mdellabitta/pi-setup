@@ -61,9 +61,9 @@ fi
 
 source $HOME/.profile
 
-echo '---> Installing python 3.9.5 and setting it as default'
-pyenv install -s 3.9.5
-pyenv global 3.9.5
+echo '---> Installing python 3.10.2 and setting it as default'
+pyenv install -s 3.10.2
+pyenv global 3.10.2
 
 
 echo '---> Upgrading pip'
