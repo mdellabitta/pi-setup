@@ -22,3 +22,5 @@ services:
       - 6789:6789 #optional
       - 5514:5514/udp #optional
     restart: unless-stopped
+volumes:
+  unifi_config:
