@@ -10,7 +10,7 @@ services:
       #- MEM_LIMIT=1024 #optional
       #- MEM_STARTUP=1024 #optional
     volumes:
-      - <path to data>:/config
+      - unifi_config:/config
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
