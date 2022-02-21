@@ -9,9 +9,11 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /path/to/data:/config
+      - config:/config
     ports:
       - 8123:8123 #optional
     #devices:
       #- /path/to/device:/path/to/device #optional
     restart: unless-stopped
+volumes:
+  config:
