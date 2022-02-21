@@ -123,9 +123,9 @@
     - name: Make Netdata available on the LAN
       ansible.builtin.lineinfile:
         path: /etc/netdata/netdata.conf
-        line: "\tbind socket to IP = 0.0.0.0"
+        line: "\tbind to = *"
         state: present
-        regexp: 'bind socket to IP'
+        regexp: 'bind to ='
       notify:
         - Restart Netdata
           
