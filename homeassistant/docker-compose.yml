@@ -5,13 +5,12 @@ services:
     image: lscr.io/linuxserver/homeassistant
     container_name: homeassistant
     network_mode: host
+    privileged: true
     environment:
       - PUID=1000
       - PGID=1000
     volumes:
-      - config:/config
+      - /var/homeassistant:/config
     #devices:
       #- /path/to/device:/path/to/device #optional
     restart: unless-stopped
-volumes:
-  config:
