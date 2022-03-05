@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/dashy/config.yml:/app/public/conf.yml
     ports:
-      - 4000:80
+      - 80:80
     # Set any environmental variables
     environment:
       - NODE_ENV=production
