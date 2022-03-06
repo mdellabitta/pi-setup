@@ -9,6 +9,7 @@ services:
     # Pass in your config file below, by specifying the path on your host machine
     volumes:
       - /var/dashy/config.yml:/app/public/conf.yml
+      - /var/dashy/icons:/app/public/item-icons
     ports:
       - 80:80
     # Set any environmental variables
