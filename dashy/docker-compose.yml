@@ -11,7 +11,7 @@ services:
       - /var/dashy/config.yml:/app/public/conf.yml
       - /var/dashy/icons:/app/public/item-icons
     ports:
-      - 80:80
+      - 81:80
     # Set any environmental variables
     environment:
       - NODE_ENV=production
