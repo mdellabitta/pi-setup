@@ -4,13 +4,20 @@ services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
-    network_mode: host
-    privileged: true
     environment:
       - PUID=1000
       - PGID=1000
     volumes:
       - /var/homeassistant:/config
-    #devices:
-      #- /path/to/device:/path/to/device #optional
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.homeassistant.entrypoints=websecure
+      - traefik.http.routers.homeassistant.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.homeassistant.service=homeassistant_service
+      - traefik.http.services.homeassistant_service.loadbalancer.server.port=8123
+    networks:
+      - traefik_public
+networks:
+  traefik_public:
+    external: true
