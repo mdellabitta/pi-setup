@@ -110,6 +110,7 @@
           - apache2-utils
           - emacs-nox
           - elpa-yaml-mode
+          - tmux
         state: latest
 
     - name: Add Netdata user to Docker group
