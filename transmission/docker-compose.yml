@@ -7,8 +7,8 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - USER=${USER}
-      - PASS=${PASS}
+      - USER=admin
+      - PASS
     volumes:
       - config:/config
       - /var/transmission/downloads:/downloads
