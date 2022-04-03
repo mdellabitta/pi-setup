@@ -4,9 +4,6 @@ services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
-    environment:
-      - PUID=1000
-      - PGID=1000
     volumes:
       - /var/homeassistant:/config
     restart: unless-stopped
