@@ -3,6 +3,7 @@
  services:
     snowflake-proxy:
         network_mode: host
-        image: mdellabitta/snowflake-proxy:latest
+        image: thetorproject/snowflake-proxy:latest
+        #image: mdellabitta/snowflake-proxy:latest
         container_name: snowflake-proxy
         restart: unless-stopped
