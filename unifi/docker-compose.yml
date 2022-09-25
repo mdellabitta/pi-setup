@@ -25,7 +25,6 @@ services:
       - "traefik.http.routers.unifi.rule=Host(`${TRAEFIK_HOST}`)"
       - "traefik.http.routers.unifi.entrypoints=websecure"
       - "traefik.http.routers.unifi.tls=true"
-      - "traefik.http.routers.unifi.tls.certResolver=leresolver"
       - "traefik.http.services.unifi.loadbalancer.server.port=8443"
       - "traefik.http.services.unifi.loadbalancer.server.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
