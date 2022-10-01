@@ -1,7 +1,7 @@
 version: "3"
 services:
   watchtower:
-    command: --run-once --cleanup
+    command: --cleanup
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
