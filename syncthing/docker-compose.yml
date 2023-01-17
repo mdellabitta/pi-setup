@@ -1,0 +1,33 @@
+---
+version: "2.1"
+services:
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    hostname: $TRAEFIK_HOST
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /var/syncthing/config:/config
+      - /var/syncthing/sync:/sync
+      - /var/syncthing/data1:/data1
+      - /var/syncthing/data2:/data2
+    ports:
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
+    restart: unless-stopped
+    networks:
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.syncthing.entrypoints=websecure"
+      - "traefik.http.routers.syncthing.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.syncthing.tls=true"
+      - "traefik.http.routers.syncthing.service=syncthing"
+      - "traefik.http.services.syncthing.loadbalancer.server.port=8384"
+networks:
+  traefik_public:
+    external: true
