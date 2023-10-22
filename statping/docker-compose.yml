@@ -1,0 +1,27 @@
+version: '2.3'
+
+services:
+  statping:
+    container_name: statping
+    image: adamboutcher/statping-ng:latest
+    restart: always
+    volumes:
+      - /var/statping_data:/app
+    environment:
+      DB_CONN: sqlite
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.statping.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.statping.entrypoints=websecure"
+      - "traefik.http.routers.statping.service=statping_service"
+      - "traefik.http.services.statping_service.loadbalancer.server.port=8080"
+    networks:
+      - traefik_public
+
+networks:
+  traefik_public:
+    external: true
+
+
+volumes:
+  statping_data:
