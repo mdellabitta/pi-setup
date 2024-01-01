@@ -1,0 +1,40 @@
+version: "3.3"
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    volumes:
+      - /var/homepage/config:/app/config 
+      #- /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+    depends_on:
+      - socket_proxy
+    networks:
+      - traefik_public
+      - socket_proxy
+
+  socket_proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      SERVICES: 1
+      TASKS: 1
+      POST: 0
+      LOG_LEVEL: warning
+    ports:
+        - 2375:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket_proxy
+
+networks:
+  traefik_public:
+    external: true
+  socket_proxy:
+    external: true
