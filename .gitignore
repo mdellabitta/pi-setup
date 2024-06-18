@@ -1,4 +1,5 @@
 .env
+unifi-network-application/init-mongo.js
 
 ansible/.vagrant/
 ansible/venv/
