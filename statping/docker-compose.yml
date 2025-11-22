@@ -1,5 +1,3 @@
-version: '2.3'
-
 services:
   statping:
     container_name: statping
@@ -9,17 +7,11 @@ services:
       - /var/statping_data:/app
     environment:
       DB_CONN: sqlite
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.statping.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.statping.entrypoints=websecure"
-      - "traefik.http.routers.statping.service=statping_service"
-      - "traefik.http.services.statping_service.loadbalancer.server.port=8080"
     networks:
-      - traefik_public
+      - caddy_default
 
 networks:
-  traefik_public:
+  caddy_default:
     external: true
 
 

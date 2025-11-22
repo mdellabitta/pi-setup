@@ -2,6 +2,7 @@ services:
 
   unifi-mongo:
     image: mongo:4.4.18
+    command: --quiet
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -37,18 +38,10 @@ services:
       - 8443:8443
     restart: unless-stopped
     networks:
-      - traefik_public
+      - caddy_default
       - unifi-internal
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.unifi.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.unifi.entrypoints=websecure"
-      - "traefik.http.routers.unifi.tls=true"
-      - "traefik.http.services.unifi.loadbalancer.server.port=8443"
-      - "traefik.http.services.unifi.loadbalancer.server.scheme=https"
-      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
 
 networks:
-  traefik_public:
+  caddy_default:
     external: true
   unifi-internal:

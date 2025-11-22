@@ -1,6 +1,6 @@
 .env
 unifi-network-application/init-mongo.js
-
+caddy/conf/
 ansible/.vagrant/
 ansible/venv/
 .vscode/
